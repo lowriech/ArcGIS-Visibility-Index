@@ -2,10 +2,8 @@ import arcpy
 import numpy
 import csv
 import math
-# Use half of the cores on the machine.
-arcpy.env.parallelProcessingFactor = "100%"
-arcpy.env.overwriteOutput = True
 
+#load spatial and 3d analyst extensions
 try:
     if arcpy.CheckExtension("3D") == "Available":
         arcpy.CheckOutExtension("3D")
@@ -19,6 +17,9 @@ except LicenseError:
     print "3D Analyst or Spatial Analyst license is unavailable"
 except:
     print arcpy.GetMessages(2)
+
+arcpy.env.parallelProcessingFactor = "100%"
+arcpy.env.overwriteOutput = True
 
 
 def ViewAngle (a, b, c):
@@ -49,7 +50,7 @@ def Cell_Loc (VP_X, VP_Y, cent_x, cent_y, aspect, cell_res):
 
 
 def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
-
+    #incorrectly named, should be called the hypotenuse or distance...
     Adj = math.hypot(VP_X-cent_x, VP_Y-cent_y)
     Opp = (cent_z - VP_Z)
     AngleTan = math.atan(Opp/Adj)
@@ -65,39 +66,33 @@ def AspectSector (VP_X, VP_Y, cent_x, cent_y):
     else:
         return asp + 180
     
-    
-#########################################################################################
-#    Slope, Aspect, and DEM are not necessary if the points have been precalculated     #
-#########################################################################################
-#SLOPE = r"D:\\Bluespace\\DEM\\slope_clipped.tif"
-#DEM = r"D:\\Bluespace\\DEM\\dem_clipped.tif"
-#ASPECT = r"D:\\Bluespace\\DEM\\aspect_clip.tif"
 
 
-#############################################################
-#   To Calculate the CellValues:                            #
-#   Raster to Multipoint, using the DEM as the input raster #
-#   Multipart to Singlepart                                 #
-#   Extract values to points                                #
-#      - Slope (calculated from DEM)                        #
-#      - Aspect (also calculated from DEM)                  #
-#      - Z_Value (extracted from the DEM)                   #       
-#############################################################
-
+#CellValues with elevation, slope, and aspect data
 CellValues = arcpy.GetParameterAsText(0)
+#the elevation field
 CV_Z = arcpy.GetParameterAsText(1)
+#the slope field
 CV_Slope = arcpy.GetParameterAsText(2)
+#the aspect field
 CV_Aspect = arcpy.GetParameterAsText(3)
+#does the data already have XY data in its table?  If not it will be calculated
 CV_XY = arcpy.GetParameterAsText(4)
+#name for the output CSV
 FileName = arcpy.GetParameterAsText(5)
+#the VP shapefile
 ViewPoints = arcpy.GetParameterAsText(6)
+#the vp elevation field
 Viewpoint_Z = arcpy.GetParameterAsText(7)
+#folder containing precalculated viewsheds
 Viewshed_Folder = arcpy.GetParameterAsText(8)
+#scratchspace for intermediate points, will be deprecated
 scratchspace = arcpy.GetParameterAsText(9)
 
 if not CV_XY:
     arcpy.AddXY_management(CellValues)
 
+#will be deprecated if there is a native way of selecting to save a csv file
 if FileName[-4:] != '.csv':
     FileName = str(FileName) + ".csv"
 
@@ -107,74 +102,56 @@ outfile = open(FileName, 'wb')
 writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
 writer.writerow(headings)
 
-
+#currently only analyzing bluespace.  However, this could be changed by point to analyze both blue and greenspace
 environment = 'bluespace'
 
-#############################################################
-#   The Viewpoints that we care about analyzing             #
-#   These should have a field for the "POINT_Z"             #
-#############################################################   
-#arcpy.RepairGeometry_management (CellValues)
-ViewPointsIterate = arcpy.SearchCursor(ViewPoints)
+
+VPs = arcpy.SearchCursor(ViewPoints)
 
 
-for Viewpoint in ViewPointsIterate:
-    #############################################################
-    #   Lines 117 - 124 just set up a single-point shapefile    #
-    #############################################################
+for Viewpoint in VPs:
+    #Create a single point shapefile
+    #This can likely be shortened
     whereClause = '"FID" = ' + str(Viewpoint.FID)
     arcpy.MakeFeatureLayer_management(ViewPoints, "in_memory\\curVP" + str(Viewpoint.FID), whereClause)
     arcpy.CopyFeatures_management(("in_memory\\curVP" + str(Viewpoint.FID)), scratchspace + "\\curVP" + str(Viewpoint.FID) + ".shp") 
     ViewPoint = scratchspace + "\\curVP" + str(Viewpoint.FID) + ".shp"
     arcpy.AddXY_management(ViewPoint)
     ViewPointSearch = arcpy.SearchCursor(ViewPoint)
+    #The search cursor only runs through one point, hence this can likely be shortened
     for row in ViewPointSearch:
-        ViewPoint_XY = row.POINT_X, row.POINT_Y, row.getValue(Viewpoint_Z)
-
-    #############################################################
-    #   These have been precalculated                           #
-    #   Polygons representing the visible areas                 #
-    #   Clip the cell values using the Viewsheds                #
-    #############################################################    
-    #view_extent = r"D:\\Bluespace\\Viewsheds\\Polygons\\poly_" + str(Viewpoint.FID) +".shp"
+        ViewPoint_XYZ = row.POINT_X, row.POINT_Y, row.getValue(Viewpoint_Z)
+    
+    #path to the viewshed file
+    #ideally this could also link into the table of VPs
     view_extent = Viewshed_Folder + "\\poly_" + str(Viewpoint.FID) +".shp"
     arcpy.RepairGeometry_management (view_extent)
-    #arcpy.MultipartToSinglepart_management(view_extent, "in_memory\\current_clip")
+    
     #Clip the Cell Values using the view extent
     visible_pts = scratchspace + "\\vis_pts_" + str(Viewpoint.FID) + ".shp"
     arcpy.Clip_analysis (CellValues, view_extent, visible_pts)
-
-    VisibleCellsSearch = arcpy.SearchCursor(visible_pts)
-    count = 0
-    runningtotal = 0
-    runningtotal2 = 0
-    aspectcount = 0
-    AngleCount = 0
-    successcount = 0
-    CloseCells = 0
-    MidCells = 0
-    FarCells = 0
-    DistCells = 0
-    CloseCellsSlope = []
-    MidCellsSlope = []
-    FarCellsSlope = []
-    DistCellsSlope = []        
-   
-      
+    
+    #reset the counts
+    count, runningtotal, runningtotal2, aspectcount, AngleCount, successcount, CloseCells, MidCells, FarCells, DistCells = 0,0,0,0,0,0,0,0,0,0
+    CloseCellsSlope, MidCellsSlope, FarCellsSlope, DistCellsSlope = [], [], [], []
+    VisibleCellsSearch = arcpy.SearchCursor(visible_pts) 
     
     for cell in VisibleCellsSearch:
+        # 0 1 2 3     4
+        # X Y Z Slope Aspect
         Cell_Props = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Z), cell.getValue(CV_Slope), cell.getValue(CV_Aspect)
             
-            
-        ''''calculate the verticle angle between observor and cell'''
-        '''If verticle angle is negative then viewpoint below obdservor and therefore influnce of aspect needs to be modified.;'''
+        # calculate the verticle angle between observor and cell
+        # If verticle angle is negative then viewpoint below obdservor and therefore influnce of aspect needs to be modified.;
         
-        VerticalAngle = Vert_Angle(ViewPoint_XY[0], ViewPoint_XY[1], ViewPoint_XY[2], Cell_Props[0], Cell_Props[1], Cell_Props[4])
+        #vertical angle, hypotenuse, delta_z, cell_z, VP_z
+        #Currently returning a bunch of unused, redundant variables
+        VerticalAngle = Vert_Angle(ViewPoint_XYZ[0], ViewPoint_XYZ[1], ViewPoint_XYZ[2], Cell_Props[0], Cell_Props[1], Cell_Props[4])
             
         '''If cell slope greater than vertical angle continue, else break'''
         if VerticalAngle[0] <= Cell_Props[2]:
             '''calculate distances between cells and viewpoint for use in calculating the degrees of visibility''' 
-            distances = Cell_Loc (ViewPoint_XY[0], ViewPoint_XY[1], Cell_Props[0], Cell_Props[1], Cell_Props[2], 5)
+            distances = Cell_Loc (ViewPoint_XYZ[0], ViewPoint_XYZ[1], Cell_Props[0], Cell_Props[1], Cell_Props[2], 5)
                 
             Hyp = max(distances)
             Adj = numpy.median(distances)
@@ -184,7 +161,7 @@ for Viewpoint in ViewPointsIterate:
             '''Add the influence of aspect here'''
             
             
-            aspect = AspectSector(ViewPoint_XY[0], ViewPoint_XY[1], Cell_Props[0], Cell_Props[1])
+            aspect = AspectSector(ViewPoint_XYZ[0], ViewPoint_XYZ[1], Cell_Props[0], Cell_Props[1])
             RelativeAspect = Cell_Props[3] - aspect
                 
                 
