@@ -138,7 +138,7 @@ for Viewpoint in VPs:
     for cell in VisibleCellsSearch:
         # 0 1 2 3     4
         # X Y Z Slope Aspect
-        Cell_Props = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Z), cell.getValue(CV_Slope), cell.getValue(CV_Aspect)
+        Cell_Props = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Slope), cell.getValue(CV_Aspect), cell.getValue(CV_Z), 
             
         # calculate the verticle angle between observor and cell
         # If verticle angle is negative then viewpoint below obdservor and therefore influnce of aspect needs to be modified.;
