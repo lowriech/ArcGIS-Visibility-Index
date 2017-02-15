@@ -148,7 +148,10 @@ for Viewpoint in VPs:
         #Currently returning a bunch of unused, redundant variables
         VerticalAngle = Vert_Angle(ViewPoint_XYZ[0], ViewPoint_XYZ[1], ViewPoint_XYZ[2], Cell_Props[0], Cell_Props[1], Cell_Props[4])
             
-        '''If cell slope greater than vertical angle continue, else break'''
+        #seems that this needs to handle cases:
+        #  1) the cell is above, but steeper and facing the viewer
+        # facing the viewer -> aspect_cell = aspect_viewer (+ -) 90
+        #  2) the cell is below and visible
         if VerticalAngle[0] <= Cell_Props[2]:
             '''calculate distances between cells and viewpoint for use in calculating the degrees of visibility''' 
             distances = Cell_Loc (ViewPoint_XYZ[0], ViewPoint_XYZ[1], Cell_Props[0], Cell_Props[1], Cell_Props[2], 5)
