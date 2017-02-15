@@ -50,7 +50,6 @@ def Cell_Loc (VP_X, VP_Y, cent_x, cent_y, aspect, cell_res):
 
 
 def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
-    #incorrectly named, should be called the hypotenuse or distance...
     Adj = math.hypot(VP_X-cent_x, VP_Y-cent_y)
     Opp = (cent_z - VP_Z)
     AngleTan = math.atan(Opp/Adj)
