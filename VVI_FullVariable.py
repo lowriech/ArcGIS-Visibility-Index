@@ -21,6 +21,16 @@ except:
 arcpy.env.parallelProcessingFactor = "100%"
 arcpy.env.overwriteOutput = True
 
+def 4corners_xyz(X, Y, Z, aspect, slope, cell_res):
+    cell_res = 5
+    x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(45-aspect)
+    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(45-aspect)
+    x_topL = X + math.sqrt(2*cell_res*cell_res)*math.cos(135-aspect)
+    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(135-aspect)
+    x_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(225-aspect)
+    y_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(225-aspect)
+    y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(315-aspect)
+    y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(315-aspect)
 
 def ViewAngle (a, b, c):
     "calculates the viewing angle of each visible cell"
