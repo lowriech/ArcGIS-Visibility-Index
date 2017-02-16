@@ -19,4 +19,6 @@ For each point visible from a viewpoint:
 - projects those points to a spherical coordinate system, relative to the viewpoint
 - calculates the area on that coordinate system that the cell occupies, aka the visibility
 
+This means there is currently some distortion to account for, but this should be minimal since it is at the poles and most cells will be near the centerline.  
+
 It sums the cells, to calculate total visibility
