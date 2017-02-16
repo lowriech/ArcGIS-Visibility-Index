@@ -32,6 +32,7 @@ ViewPoints = arcpy.GetParameterAsText(6)
 Viewpoint_Z = arcpy.GetParameterAsText(7)
 Viewshed_Folder = arcpy.GetParameterAsText(8)
 scratchspace = arcpy.GetParameterAsText(9)
+#TODO: add cell resolution
 
 if not CV_XY:
     arcpy.AddXY_management(CellValues)
@@ -77,7 +78,6 @@ def makeSinglePoint(Viewpoint):
     arcpy.MakeFeatureLayer_management(ViewPoints, "in_memory\\curVP" + str(Viewpoint.FID), whereClause)
     VP_single = scratchspace + "\\curVP" + str(Viewpoint.FID) + ".shp"
     arcpy.CopyFeatures_management(("in_memory\\curVP" + str(Viewpoint.FID)), VP_single) 
-    
     return VP_single
 
 
