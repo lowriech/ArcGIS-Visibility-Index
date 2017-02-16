@@ -22,6 +22,7 @@ arcpy.env.parallelProcessingFactor = "100%"
 arcpy.env.overwriteOutput = True
 
 def corners_xyz(X, Y, Z, aspect, slope, cell_res):
+    #Returns the four corners of the cell
     cell_res = 5
     x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
     y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
@@ -33,7 +34,7 @@ def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     y_bottomR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
     z_top = Z + cell_res/2.0*math.tan(math.radians(slope))
     z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
-    return (x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom) 
+    return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
 
 def ViewAngle (a, b, c):
     "calculates the viewing angle of each visible cell"
