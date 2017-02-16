@@ -23,16 +23,16 @@ arcpy.env.overwriteOutput = True
 
 def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     cell_res = 5
-    x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(45-aspect)
-    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(45-aspect)
-    x_topL = X + math.sqrt(2*cell_res*cell_res)*math.cos(135-aspect)
-    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(135-aspect)
-    x_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(225-aspect)
-    y_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(225-aspect)
-    y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(315-aspect)
-    y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(315-aspect)
-    z_top = Z + cell_res/2.0*math.tan(slope)
-    z_bottom = Z - cell_res/2.0*math.tan(slope)
+    x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
+    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
+    x_topL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
+    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
+    x_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
+    y_bottomL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
+    y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
+    y_bottomR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
+    z_top = Z + cell_res/2.0*math.tan(math.radians(slope))
+    z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
     return (x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom) 
 
 def ViewAngle (a, b, c):
