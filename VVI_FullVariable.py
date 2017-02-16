@@ -80,7 +80,7 @@ def Vert_Horiz_Angles(VP, pt):
     Adj = math.hypot(VP[0]-pt[0], VP[1]-pt[1])
     Opp = (pt[2] - VP[2])
     Vert = math.atan(Opp/Adj)
-    return Horiz, Vert
+    return math.degrees(Horiz), math.degrees(Vert)
     
 
 def AspectSector (VP_X, VP_Y, cent_x, cent_y):
