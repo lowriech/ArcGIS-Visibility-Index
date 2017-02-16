@@ -22,66 +22,24 @@ arcpy.env.parallelProcessingFactor = "100%"
 arcpy.env.overwriteOutput = True
 
 #Get Parameters
-
-#CellValues with elevation, slope, and aspect data
 CellValues = arcpy.GetParameterAsText(0)
-#the elevation field
 CV_Z = arcpy.GetParameterAsText(1)
-#the slope field
 CV_Slope = arcpy.GetParameterAsText(2)
-#the aspect field
 CV_Aspect = arcpy.GetParameterAsText(3)
-#does the data already have XY data in its table?  If not it will be calculated
 CV_XY = arcpy.GetParameterAsText(4)
-#name for the output CSV
 FileName = arcpy.GetParameterAsText(5)
-#the VP shapefile
 ViewPoints = arcpy.GetParameterAsText(6)
-#the vp elevation field
 Viewpoint_Z = arcpy.GetParameterAsText(7)
-#folder containing precalculated viewsheds
 Viewshed_Folder = arcpy.GetParameterAsText(8)
-#scratchspace for intermediate points, will be deprecated
 scratchspace = arcpy.GetParameterAsText(9)
 
 if not CV_XY:
     arcpy.AddXY_management(CellValues)
 
-#will be deprecated if there is a native way of selecting to save a csv file
+#TODO: deprecate with native way to select to save as a csv using ArcGIS interface
 if FileName[-4:] != '.csv':
     FileName = str(FileName) + ".csv"
 
-#deprecated
-def AspectSector (VP_X, VP_Y, cent_x, cent_y):
-    asp = 180  + math.atan2((VP_X - cent_x), (VP_Y - cent_y)) * (180 / math.pi)
-    if asp > 180:
-        return asp - 180.0
-    else:
-        return asp + 180
-
-#deprecated, now Horiz_Vert_Angle()
-def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
-    Adj = math.hypot(VP_X-cent_x, VP_Y-cent_y)
-    Opp = (cent_z - VP_Z)
-    AngleTan = math.atan(Opp/Adj)
-    return math.degrees(AngleTan), Adj, Opp, cent_z, VP_Z
-    
-#deprecated
-def Cell_Loc (VP_X, VP_Y, cent_x, cent_y, aspect, cell_res):
-    AspectTan = math.tan(math.radians(aspect))
-    Opposite = (AspectTan * cell_res)
-    LowCornerX = cent_x - 2.5
-    LowCornerY = cent_y - (Opposite/2.0)
-    HiCornerX = cent_x + 2.5
-    HiCornerY = cent_y + (Opposite/2.0)
-    ViewPoint_X = VP_X
-    ViewPoint_Y = VP_Y
-    
-    dist1 = math.hypot(ViewPoint_X-LowCornerX, ViewPoint_Y-LowCornerY)
-    dist2 = math.hypot(ViewPoint_X-HiCornerX, ViewPoint_Y-HiCornerY)
-    dist3 = math.hypot(LowCornerX-HiCornerX, LowCornerY-HiCornerY)
-    
-    return dist1, dist2, dist3
 def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     #Returns the four corners of the cell
     cell_res = 5
@@ -97,24 +55,12 @@ def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
     return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
 
-def ViewAngle (a, b, c):
-    "calculates the viewing angle of each visible cell"
-    a2 = a*a
-    b2 = b*b
-    c2 = c*c
-    VA = (a2-b2+c2)/ (2.0 * (a*c))
-    rads = math.acos(VA)
-    return math.degrees(rads)
-
-
 def quadrilateral_area(pts):
     #2A = (x1y2 - x2y1) + (x2y3 - x3y2) + (x3y4 - x4y3) + (x4y1 - x1y4)
     #This has the issue that we aren't working with cartesian points, we are working with pts on a sphere
     #Which leads to distortions at the poles, but should be minimal
     A = ((pts[0][0]*pts[1][1] - pts[1][0]*pts[0][1]) + (pts[1][0]*pts[2][1] - pts[2][0]*pts[1][1]) + (pts[2][0]*pts[3][1] - pts[3][0]*pts[2][1]) + (pts[3][0]*pts[0][1] - pts[0][0]*pts[3][1]))/2
     return math.abs(A)
-
-
 
 def Horiz_Vert_Angle(VP, pt):
     #for spherical coordinates
@@ -125,9 +71,7 @@ def Horiz_Vert_Angle(VP, pt):
     Opp = (pt[2] - VP[2])
     Vert = math.atan(Opp/Adj)
     return math.degrees(Horiz), math.degrees(Vert)
-    
-
-    
+     
 def makeSinglePoint(Viewpoint):
     whereClause = '"FID" = ' + str(Viewpoint.FID)
     arcpy.MakeFeatureLayer_management(ViewPoints, "in_memory\\curVP" + str(Viewpoint.FID), whereClause)
@@ -165,7 +109,7 @@ for VP in VPs:
     arcpy.Clip_analysis (CellValues, view_extent, visible_pts)
     
     #reset the counts
-    count, runningtotal, runningtotal2, aspectcount, AngleCount, successcount, CloseCells, MidCells, FarCells, DistCells = 0,0,0,0,0,0,0,0,0,0
+    count, runningtotal = 0, 0
     CloseCellsSlope, MidCellsSlope, FarCellsSlope, DistCellsSlope = [], [], [], []
     VisibleCellsSearch = arcpy.SearchCursor(visible_pts) 
     
@@ -180,7 +124,7 @@ for VP in VPs:
         runningtotal += quadrilateral_area(pts)
         
     
-    row = [Viewpoint.FID, runningtotal] # Numbers that are written    
+    row = [str(Viewpoint.FID), runningtotal] # Numbers that are written    
     writer.writerow(row)
     print('x')
     #arcpy.Delete_management("C:\\Users\\lowriech\\Documents\\ArcGIS\\curPoint_A.shp") 
