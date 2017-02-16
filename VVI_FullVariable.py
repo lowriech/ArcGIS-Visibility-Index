@@ -64,7 +64,7 @@ def Cell_Loc (VP_X, VP_Y, cent_x, cent_y, aspect, cell_res):
 def quadrilateral_area(pts):
     #2A = (x1y2 - x2y1) + (x2y3 - x3y2) + (x3y4 - x4y3) + (x4y1 - x1y4)
     A = ((pts[0][0]*pts[1][1] - pts[1][0]*pts[0][1]) + (pts[1][0]*pts[2][1] - pts[2][0]*pts[1][1]) + (pts[2][0]*pts[3][1] - pts[3][0]*pts[2][1]) + (pts[3][0]*pts[0][1] - pts[0][0]*pts[3][1]))/2
-    return A
+    return math.abs(A)
 
 def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
     Adj = math.hypot(VP_X-cent_x, VP_Y-cent_y)
