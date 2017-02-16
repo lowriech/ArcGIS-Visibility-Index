@@ -21,7 +21,7 @@ except:
 arcpy.env.parallelProcessingFactor = "100%"
 arcpy.env.overwriteOutput = True
 
-def 4corners_xyz(X, Y, Z, aspect, slope, cell_res):
+def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     cell_res = 5
     x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(45-aspect)
     y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(45-aspect)
@@ -31,6 +31,9 @@ def 4corners_xyz(X, Y, Z, aspect, slope, cell_res):
     y_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(225-aspect)
     y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(315-aspect)
     y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(315-aspect)
+    z_top = Z + cell_res/2.0*math.tan(slope)
+    z_bottom = Z - cell_res/2.0*math.tan(slope)
+    return (x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom) 
 
 def ViewAngle (a, b, c):
     "calculates the viewing angle of each visible cell"
@@ -65,7 +68,15 @@ def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
     AngleTan = math.atan(Opp/Adj)
     return math.degrees(AngleTan), Adj, Opp, cent_z, VP_Z
 
-
+def Vert_Horiz_Angles(VP, pt):
+    #for spherical coordinates
+    #horizontal angle
+    Horiz = math.atan((VP[1]-pt[1])/(VP[0]-pt[0]))
+    #vertical angle
+    Adj = math.hypot(VP[0]-pt[0], VP[1]-pt[1])
+    Opp = (pt[2] - VP[2])
+    Vert = math.atan(Opp/Adj)
+    return Horiz, Vert
     
 
 def AspectSector (VP_X, VP_Y, cent_x, cent_y):
