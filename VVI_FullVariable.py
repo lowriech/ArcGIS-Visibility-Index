@@ -21,6 +21,37 @@ except:
 arcpy.env.parallelProcessingFactor = "100%"
 arcpy.env.overwriteOutput = True
 
+#Get Parameters
+
+#CellValues with elevation, slope, and aspect data
+CellValues = arcpy.GetParameterAsText(0)
+#the elevation field
+CV_Z = arcpy.GetParameterAsText(1)
+#the slope field
+CV_Slope = arcpy.GetParameterAsText(2)
+#the aspect field
+CV_Aspect = arcpy.GetParameterAsText(3)
+#does the data already have XY data in its table?  If not it will be calculated
+CV_XY = arcpy.GetParameterAsText(4)
+#name for the output CSV
+FileName = arcpy.GetParameterAsText(5)
+#the VP shapefile
+ViewPoints = arcpy.GetParameterAsText(6)
+#the vp elevation field
+Viewpoint_Z = arcpy.GetParameterAsText(7)
+#folder containing precalculated viewsheds
+Viewshed_Folder = arcpy.GetParameterAsText(8)
+#scratchspace for intermediate points, will be deprecated
+scratchspace = arcpy.GetParameterAsText(9)
+
+if not CV_XY:
+    arcpy.AddXY_management(CellValues)
+
+#will be deprecated if there is a native way of selecting to save a csv file
+if FileName[-4:] != '.csv':
+    FileName = str(FileName) + ".csv"
+
+    
 def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     #Returns the four corners of the cell
     cell_res = 5
@@ -93,35 +124,14 @@ def AspectSector (VP_X, VP_Y, cent_x, cent_y):
     else:
         return asp + 180
     
+def makeSinglePoint(Viewpoint):
+    whereClause = '"FID" = ' + str(Viewpoint.FID)
+    arcpy.MakeFeatureLayer_management(ViewPoints, "in_memory\\curVP" + str(Viewpoint.FID), whereClause)
+    VP_single = scratchspace + "\\curVP" + str(Viewpoint.FID) + ".shp"
+    arcpy.CopyFeatures_management(("in_memory\\curVP" + str(Viewpoint.FID)), VP_single) 
+    
+    return VP_single
 
-
-#CellValues with elevation, slope, and aspect data
-CellValues = arcpy.GetParameterAsText(0)
-#the elevation field
-CV_Z = arcpy.GetParameterAsText(1)
-#the slope field
-CV_Slope = arcpy.GetParameterAsText(2)
-#the aspect field
-CV_Aspect = arcpy.GetParameterAsText(3)
-#does the data already have XY data in its table?  If not it will be calculated
-CV_XY = arcpy.GetParameterAsText(4)
-#name for the output CSV
-FileName = arcpy.GetParameterAsText(5)
-#the VP shapefile
-ViewPoints = arcpy.GetParameterAsText(6)
-#the vp elevation field
-Viewpoint_Z = arcpy.GetParameterAsText(7)
-#folder containing precalculated viewsheds
-Viewshed_Folder = arcpy.GetParameterAsText(8)
-#scratchspace for intermediate points, will be deprecated
-scratchspace = arcpy.GetParameterAsText(9)
-
-if not CV_XY:
-    arcpy.AddXY_management(CellValues)
-
-#will be deprecated if there is a native way of selecting to save a csv file
-if FileName[-4:] != '.csv':
-    FileName = str(FileName) + ".csv"
 
 # Open up the CSV writer
 headings = ['ViewPoint_ID', 'RawTotal', 'AdjustTotal', 'No_Err', 'Folder_Dir', 'AspectErrors', 'SlopeErrors', 'Success', '300', 'CloseCellsSlope', '3000', 'MidcellsSlope', '6000', 'FarCellsSlope', '6000_plus', 'DistCellsSlope', 'VP_X', 'VP_Y']
