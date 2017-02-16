@@ -73,7 +73,7 @@ def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
     AngleTan = math.atan(Opp/Adj)
     return math.degrees(AngleTan), Adj, Opp, cent_z, VP_Z
 
-def Vert_Horiz_Angles(VP, pt):
+def Horiz_Vert_Angles(VP, pt):
     #for spherical coordinates
     #horizontal angle
     Horiz = math.atan((VP[1]-pt[1])/(VP[0]-pt[0]))
