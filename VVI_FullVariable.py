@@ -51,7 +51,37 @@ if not CV_XY:
 if FileName[-4:] != '.csv':
     FileName = str(FileName) + ".csv"
 
+#deprecated
+def AspectSector (VP_X, VP_Y, cent_x, cent_y):
+    asp = 180  + math.atan2((VP_X - cent_x), (VP_Y - cent_y)) * (180 / math.pi)
+    if asp > 180:
+        return asp - 180.0
+    else:
+        return asp + 180
+
+#deprecated, now Horiz_Vert_Angle()
+def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
+    Adj = math.hypot(VP_X-cent_x, VP_Y-cent_y)
+    Opp = (cent_z - VP_Z)
+    AngleTan = math.atan(Opp/Adj)
+    return math.degrees(AngleTan), Adj, Opp, cent_z, VP_Z
     
+#deprecated
+def Cell_Loc (VP_X, VP_Y, cent_x, cent_y, aspect, cell_res):
+    AspectTan = math.tan(math.radians(aspect))
+    Opposite = (AspectTan * cell_res)
+    LowCornerX = cent_x - 2.5
+    LowCornerY = cent_y - (Opposite/2.0)
+    HiCornerX = cent_x + 2.5
+    HiCornerY = cent_y + (Opposite/2.0)
+    ViewPoint_X = VP_X
+    ViewPoint_Y = VP_Y
+    
+    dist1 = math.hypot(ViewPoint_X-LowCornerX, ViewPoint_Y-LowCornerY)
+    dist2 = math.hypot(ViewPoint_X-HiCornerX, ViewPoint_Y-HiCornerY)
+    dist3 = math.hypot(LowCornerX-HiCornerX, LowCornerY-HiCornerY)
+    
+    return dist1, dist2, dist3
 def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     #Returns the four corners of the cell
     cell_res = 5
@@ -77,22 +107,6 @@ def ViewAngle (a, b, c):
     return math.degrees(rads)
 
 
-def Cell_Loc (VP_X, VP_Y, cent_x, cent_y, aspect, cell_res):
-    AspectTan = math.tan(math.radians(aspect))
-    Opposite = (AspectTan * cell_res)
-    LowCornerX = cent_x - 2.5
-    LowCornerY = cent_y - (Opposite/2.0)
-    HiCornerX = cent_x + 2.5
-    HiCornerY = cent_y + (Opposite/2.0)
-    ViewPoint_X = VP_X
-    ViewPoint_Y = VP_Y
-    
-    dist1 = math.hypot(ViewPoint_X-LowCornerX, ViewPoint_Y-LowCornerY)
-    dist2 = math.hypot(ViewPoint_X-HiCornerX, ViewPoint_Y-HiCornerY)
-    dist3 = math.hypot(LowCornerX-HiCornerX, LowCornerY-HiCornerY)
-    
-    return dist1, dist2, dist3
-
 def quadrilateral_area(pts):
     #2A = (x1y2 - x2y1) + (x2y3 - x3y2) + (x3y4 - x4y3) + (x4y1 - x1y4)
     #This has the issue that we aren't working with cartesian points, we are working with pts on a sphere
@@ -100,11 +114,7 @@ def quadrilateral_area(pts):
     A = ((pts[0][0]*pts[1][1] - pts[1][0]*pts[0][1]) + (pts[1][0]*pts[2][1] - pts[2][0]*pts[1][1]) + (pts[2][0]*pts[3][1] - pts[3][0]*pts[2][1]) + (pts[3][0]*pts[0][1] - pts[0][0]*pts[3][1]))/2
     return math.abs(A)
 
-def Vert_Angle (VP_X, VP_Y, VP_Z, cent_x, cent_y, cent_z):
-    Adj = math.hypot(VP_X-cent_x, VP_Y-cent_y)
-    Opp = (cent_z - VP_Z)
-    AngleTan = math.atan(Opp/Adj)
-    return math.degrees(AngleTan), Adj, Opp, cent_z, VP_Z
+
 
 def Horiz_Vert_Angle(VP, pt):
     #for spherical coordinates
@@ -117,12 +127,6 @@ def Horiz_Vert_Angle(VP, pt):
     return math.degrees(Horiz), math.degrees(Vert)
     
 
-def AspectSector (VP_X, VP_Y, cent_x, cent_y):
-    asp = 180  + math.atan2((VP_X - cent_x), (VP_Y - cent_y)) * (180 / math.pi)
-    if asp > 180:
-        return asp - 180.0
-    else:
-        return asp + 180
     
 def makeSinglePoint(Viewpoint):
     whereClause = '"FID" = ' + str(Viewpoint.FID)
