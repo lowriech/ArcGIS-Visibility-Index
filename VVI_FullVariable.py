@@ -2,6 +2,7 @@ import arcpy
 import numpy
 import csv
 import math
+import multiprocessing
 
 #load spatial and 3d analyst extensions
 try:
@@ -88,7 +89,7 @@ writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
 writer.writerow(headings)
 
 VPs = arcpy.SearchCursor(ViewPoints)
-
+pool = multiprocessing.Pool(processes = 2)
 
 for VP in VPs:
     #Create a single point shapefile
