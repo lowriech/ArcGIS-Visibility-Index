@@ -126,7 +126,6 @@ for VP in VPs:
     
     row = [str(VP.FID), runningtotal] # Numbers that are written    
     writer.writerow(row)
-    print('x')
-    #arcpy.Delete_management("C:\\Users\\lowriech\\Documents\\ArcGIS\\curPoint_A.shp") 
-    #arcpy.Delete_management("D:\\Bluespace\\curPoint.shp")
+    arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
+    #TODO: Add delete management for intermediate shapes
 writer.close()
