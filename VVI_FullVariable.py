@@ -129,4 +129,4 @@ for VP in VPs:
     writer.writerow(row)
     arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
     #TODO: Add delete management for intermediate shapes
-writer.close()
+outfile.close()
