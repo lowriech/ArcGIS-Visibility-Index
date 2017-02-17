@@ -19,6 +19,7 @@ except LicenseError:
 except:
     print arcpy.GetMessages(2)
 
+#TODO: How does this conflict (or not) with multiprocessing
 arcpy.env.parallelProcessingFactor = "100%"
 arcpy.env.overwriteOutput = True
 
@@ -34,6 +35,7 @@ Viewpoint_Z = arcpy.GetParameterAsText(7)
 Viewshed_Folder = arcpy.GetParameterAsText(8)
 scratchspace = arcpy.GetParameterAsText(9)
 #TODO: add cell resolution
+processors = int(multiprocessing.cpu_count()) - 1
 
 if not CV_XY:
     arcpy.AddXY_management(CellValues)
@@ -41,6 +43,12 @@ if not CV_XY:
 #TODO: deprecate with native way to select to save as a csv using ArcGIS interface
 if FileName[-4:] != '.csv':
     FileName = str(FileName) + ".csv"
+
+# Open up the CSV writer
+headings = ['ViewPoint_ID', 'RawTotal']
+outfile = open(FileName, 'wb')
+writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
+writer.writerow(headings)
 
 def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     #Returns the four corners of the cell
@@ -81,17 +89,12 @@ def makeSinglePoint(Viewpoint):
     arcpy.CopyFeatures_management(("in_memory\\curVP" + str(Viewpoint.FID)), VP_single) 
     return VP_single
 
+def mp_manager_main():
+    VPs = arcpy.SearchCursor(ViewPoints)
+    pool = multiprocessing.Pool(processors)
+    x = pool.map(main, VPs)
 
-# Open up the CSV writer
-headings = ['ViewPoint_ID', 'RawTotal']
-outfile = open(FileName, 'wb')
-writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
-writer.writerow(headings)
-
-VPs = arcpy.SearchCursor(ViewPoints)
-pool = multiprocessing.Pool(processes = 2)
-
-for VP in VPs:
+def main(VP):
     #Create a single point shapefile
     #This can likely be shortened
     ViewPoint = makeSinglePoint(VP)
@@ -115,6 +118,7 @@ for VP in VPs:
     CloseCellsSlope, MidCellsSlope, FarCellsSlope, DistCellsSlope = [], [], [], []
     VisibleCellsSearch = arcpy.SearchCursor(visible_pts) 
     
+    
     for cell in VisibleCellsSearch:
         # 0 1 2     3      4
         # X Y Slope Aspect Z
@@ -130,4 +134,7 @@ for VP in VPs:
     writer.writerow(row)
     arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
     #TODO: Add delete management for intermediate shapes
+
+if __name__ == '__main__':
+    mp_manager()
 outfile.close()
