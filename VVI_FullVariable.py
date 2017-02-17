@@ -107,6 +107,7 @@ for VP in VPs:
     #Clip the Cell Values using the view extent
     visible_pts = scratchspace + "\\vis_pts_" + str(VP.FID) + ".shp"
     arcpy.Clip_analysis (CellValues, view_extent, visible_pts)
+    arcpy.AddMessage("Successfully clipped FID {}".format(str(VP.FID)))
     
     #reset the counts
     count, runningtotal = 0, 0
