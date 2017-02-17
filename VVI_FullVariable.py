@@ -50,7 +50,7 @@ def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     y_topL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
     x_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
     y_bottomL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
-    y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
+    x_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
     y_bottomR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
     z_top = Z + cell_res/2.0*math.tan(math.radians(slope))
     z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
