@@ -65,7 +65,7 @@ def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
     return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
 
-def corners_xyz2(pt):
+def corners_xyz2(cell):
     #Returns the four corners of the cell
     X, Y, Z, aspect, slope = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Z), cell.getValue(CV_Slope), cell.getValue(CV_Aspect)
     cell_res = 5
