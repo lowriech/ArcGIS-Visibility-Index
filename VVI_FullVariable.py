@@ -61,7 +61,7 @@ def quadrilateral_area(pts):
     #This has the issue that we aren't working with cartesian points, we are working with pts on a sphere
     #Which leads to distortions at the poles, but should be minimal
     A = ((pts[0][0]*pts[1][1] - pts[1][0]*pts[0][1]) + (pts[1][0]*pts[2][1] - pts[2][0]*pts[1][1]) + (pts[2][0]*pts[3][1] - pts[3][0]*pts[2][1]) + (pts[3][0]*pts[0][1] - pts[0][0]*pts[3][1]))/2
-    return math.abs(A)
+    return abs(A)
 
 def Horiz_Vert_Angle(VP, pt):
     #for spherical coordinates
