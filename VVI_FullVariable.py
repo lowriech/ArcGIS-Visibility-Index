@@ -155,10 +155,11 @@ def main(VP):
     spherical_coords = map(Horiz_Vert_Angles2, corners, pt_list)
     areas = map(quadrilateral_area, spherical_coords)
     total = numpy.sum(areas)
-    arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
+    
+    
     row = [str(VP.FID), runningtotal] # Numbers that are written    
     writer.writerow(row)
-    
+    arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
     #for cell in VisibleCellsSearch:
         # 0 1 2     3      4
         # X Y Slope Aspect Z
