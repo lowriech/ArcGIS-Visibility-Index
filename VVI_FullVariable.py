@@ -47,7 +47,7 @@ def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
     y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
     x_topL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
-    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
+    y_topL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
     x_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
     y_bottomL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
     y_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
