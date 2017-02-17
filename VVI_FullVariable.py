@@ -102,10 +102,10 @@ for VP in VPs:
     
     #path to the viewshed file
     #ideally this could also link into the table of VPs
-    view_extent = Viewshed_Folder + "\\poly_" + str(Viewpoint.FID) +".shp"
+    view_extent = Viewshed_Folder + "\\poly_" + str(VP.FID) +".shp"
     
     #Clip the Cell Values using the view extent
-    visible_pts = scratchspace + "\\vis_pts_" + str(Viewpoint.FID) + ".shp"
+    visible_pts = scratchspace + "\\vis_pts_" + str(VP.FID) + ".shp"
     arcpy.Clip_analysis (CellValues, view_extent, visible_pts)
     
     #reset the counts
@@ -124,7 +124,7 @@ for VP in VPs:
         runningtotal += quadrilateral_area(pts)
         
     
-    row = [str(Viewpoint.FID), runningtotal] # Numbers that are written    
+    row = [str(VP.FID), runningtotal] # Numbers that are written    
     writer.writerow(row)
     print('x')
     #arcpy.Delete_management("C:\\Users\\lowriech\\Documents\\ArcGIS\\curPoint_A.shp") 
