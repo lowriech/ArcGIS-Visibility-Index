@@ -65,6 +65,36 @@ def corners_xyz(X, Y, Z, aspect, slope, cell_res):
     z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
     return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
 
+def corners_xyz2(pt):
+    #Returns the four corners of the cell
+    X, Y, Z, aspect, slope = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Z), cell.getValue(CV_Slope), cell.getValue(CV_Aspect)
+    cell_res = 5
+    #TODO: double check these formulas, particularly (math.sqrt(2*res*res))
+    x_topR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
+    y_topR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(45-aspect))
+    x_topL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
+    y_topL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(135-aspect))
+    x_bottomL = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
+    y_bottomL = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(225-aspect))
+    x_bottomR = X + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
+    y_bottomR = Y + math.sqrt(2*cell_res*cell_res)*math.cos(math.radians(315-aspect))
+    z_top = Z + cell_res/2.0*math.tan(math.radians(slope))
+    z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
+    return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
+
+def Horiz_Vert_Angle2(VP, pts):
+    #for spherical coordinates
+    #horizontal angle
+    spherical_coords = []
+    for pt in pts:
+        Horiz = math.atan((VP[1]-pt[1])/(VP[0]-pt[0]))
+        #vertical angle
+        Adj = math.hypot(VP[0]-pt[0], VP[1]-pt[1])
+        Opp = (pt[2] - VP[2])
+        Vert = math.atan(Opp/Adj)
+        spherical_coords.append([math.degrees(Horiz), math.degrees(Vert)])
+    return spherical_coords
+
 def quadrilateral_area(pts):
     #2A = (x1y2 - x2y1) + (x2y3 - x3y2) + (x3y4 - x4y3) + (x4y1 - x1y4)
     #This has the issue that we aren't working with cartesian points, we are working with pts on a sphere
@@ -118,21 +148,30 @@ def main(VP):
     CloseCellsSlope, MidCellsSlope, FarCellsSlope, DistCellsSlope = [], [], [], []
     VisibleCellsSearch = arcpy.SearchCursor(visible_pts) 
     
-    
-    for cell in VisibleCellsSearch:
-        # 0 1 2     3      4
-        # X Y Slope Aspect Z
-        Cell_Props = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Slope), cell.getValue(CV_Aspect), cell.getValue(CV_Z) 
-        corners = corners_xyz(Cell_Props[0], Cell_Props[1], Cell_Props[4], Cell_Props[3], Cell_Props[2], 5)
-        pts = []
-        for pt in corners:
-            pts.append(Horiz_Vert_Angle(ViewPoint_XYZ, pt))
-        runningtotal += quadrilateral_area(pts)
-        
-    
+    #Create a list of corners
+    corners = map(corners_xyz2, VisibleCellsSearch)
+    pt_list = [VP_XYZ] * len(corners)
+    #TODO: double check passing two iterables
+    spherical_coords = map(Horiz_Vert_Angles2, corners, pt_list)
+    areas = map(quadrilateral_area, spherical_coords)
+    total = numpy.sum(areas)
+    arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
     row = [str(VP.FID), runningtotal] # Numbers that are written    
     writer.writerow(row)
-    arcpy.AddMessage("Successfully printed FID {}".format(str(VP.FID)))
+    
+    #for cell in VisibleCellsSearch:
+        # 0 1 2     3      4
+        # X Y Slope Aspect Z
+    #    Cell_Props = cell.POINT_X, cell.POINT_Y, cell.getValue(CV_Slope), cell.getValue(CV_Aspect), cell.getValue(CV_Z) 
+    #    corners = corners_xyz(Cell_Props[0], Cell_Props[1], Cell_Props[4], Cell_Props[3], Cell_Props[2], 5)
+    #    pts = []
+    #    for pt in corners:
+    #        pts.append(Horiz_Vert_Angle(ViewPoint_XYZ, pt))
+    #    runningtotal += quadrilateral_area(pts)
+        
+    
+    
+    
     #TODO: Add delete management for intermediate shapes
 
 if __name__ == '__main__':
