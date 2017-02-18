@@ -82,7 +82,7 @@ def corners_xyz2(cell):
     z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
     return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
 
-def Horiz_Vert_Angle2(VP, pts):
+def Horiz_Vert_Angle2(pts, VP):
     #for spherical coordinates
     #horizontal angle
     spherical_coords = []
