@@ -145,7 +145,7 @@ def main(VP):
     
     #Create a list of corners
     corners = map(corners_xyz2, VisibleCellsSearch)
-    pt_list = [VP_XYZ] * len(corners)
+    pt_list = [ViewPoint_XYZ] * len(corners)
     #TODO: double check passing two iterables
     spherical_coords = map(Horiz_Vert_Angles2, corners, pt_list)
     areas = map(quadrilateral_area, spherical_coords)
