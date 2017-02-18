@@ -170,9 +170,9 @@ def main(VP):
     
     #TODO: Add delete management for intermediate shapes
 
-if __name__ == '__main__':
-    VPs = arcpy.SearchCursor(ViewPoints)
-    pool = multiprocessing.Pool(processors)
-    x = pool.map(main, VPs)
+
+VPs = arcpy.SearchCursor(ViewPoints)
+for VP in VPs:
+    main(VP)
     
 outfile.close()
