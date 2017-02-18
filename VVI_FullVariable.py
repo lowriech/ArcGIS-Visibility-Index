@@ -147,7 +147,7 @@ def main(VP):
     corners = map(corners_xyz2, VisibleCellsSearch)
     pt_list = [ViewPoint_XYZ] * len(corners)
     #TODO: double check passing two iterables
-    spherical_coords = map(Horiz_Vert_Angles2, corners, pt_list)
+    spherical_coords = map(Horiz_Vert_Angle2, corners, pt_list)
     areas = map(quadrilateral_area, spherical_coords)
     total = numpy.sum(areas)
     
