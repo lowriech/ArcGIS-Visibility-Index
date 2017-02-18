@@ -31,3 +31,6 @@ For each point visible from a viewpoint:
 This means there is currently some distortion to account for, but this should be minimal since it is at the poles and most cells will be near the centerline.  
 
 It sums the cells, to calculate total visibility
+
+
+Can this all be sped up using Cython, building, and importing?
