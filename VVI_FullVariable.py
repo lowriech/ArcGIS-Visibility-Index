@@ -176,5 +176,5 @@ def main(VP):
     #TODO: Add delete management for intermediate shapes
 
 if __name__ == '__main__':
-    mp_manager()
+    mp_manager_main()
 outfile.close()
