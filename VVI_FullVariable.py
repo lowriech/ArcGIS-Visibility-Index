@@ -119,11 +119,6 @@ def makeSinglePoint(Viewpoint):
     arcpy.CopyFeatures_management(("in_memory\\curVP" + str(Viewpoint.FID)), VP_single) 
     return VP_single
 
-def mp_manager_main():
-    VPs = arcpy.SearchCursor(ViewPoints)
-    pool = multiprocessing.Pool(processors)
-    x = pool.map(main, VPs)
-
 def main(VP):
     #Create a single point shapefile
     #This can likely be shortened
@@ -176,5 +171,8 @@ def main(VP):
     #TODO: Add delete management for intermediate shapes
 
 if __name__ == '__main__':
-    mp_manager_main()
+    VPs = arcpy.SearchCursor(ViewPoints)
+    pool = multiprocessing.Pool(processors)
+    x = pool.map(main, VPs)
+    
 outfile.close()
