@@ -36,23 +36,15 @@ Viewpoint_Z = arcpy.GetParameterAsText(7)
 Viewshed_Folder = arcpy.GetParameterAsText(8)
 scratchspace = arcpy.GetParameterAsText(9)
 
-
-
-
 if not CV_XY:
     arcpy.AddXY_management(CellValues)
+
+arcpy.AddXY_management(ViewPoints)
 
 #TODO: deprecate with native way to select to save as a csv using ArcGIS interface
 if FileName[-4:] != '.csv':
     FileName = str(FileName) + ".csv"
 
-# Open up the CSV writer
-headings = ['ViewPoint_ID', 'RawTotal']
-outfile = open(FileName, 'wb')
-writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
-writer.writerow(headings)
-
-
-VVI = VVI_class.Visibility_Measure(CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace, writer)
-    
-outfile.close()
+VVI = VVI_class.Visibility_Measure(CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace)
+VVI.printPoints(FileName)
+VVI.printCellsForVisual(FileName)
