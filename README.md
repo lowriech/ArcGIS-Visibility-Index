@@ -19,18 +19,17 @@ Takes 9 inputs:
 
 8) Folder of precalculated viewsheds
 
-9) A scratchspace for intermediate points
+9) A scratchspace for intermediate points - will be deprecated with on-the-fly deletes
 
-There are plans to deprecate the scratchspace, and to add a cell resolution field
+10 - pending) Add cell resolution
 
 For each point visible from a viewpoint:
 - calculates the corner values of each cell in 3D space, using the cells Z, Slope, and Aspect.
 - projects those points to a spherical coordinate system, relative to the viewpoint
-- calculates the area on that coordinate system that the cell occupies, aka the visibility
+- calculates the area on that coordinate system that the cell occupies*, aka the visibility
+- It sums the cells, to calculate total visibility
 
-This means there is currently some distortion to account for, but this should be minimal since it is at the poles and most cells will be near the centerline.  
+*This means there is currently some distortion to account for, but this should be minimal since it is at the poles and most cells will be near the centerline.  
 
-It sums the cells, to calculate total visibility
-
-
-Can this all be sped up using Cython, building, and importing?
+The tool outputs a csv of each FID with its total visibility.  
+It also outputs csvs of the cells, relative to the viewer.  This can be used to visualize the location, see screenshots.
