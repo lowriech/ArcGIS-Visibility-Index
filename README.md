@@ -29,9 +29,9 @@ For each point visible from a viewpoint:
 - calculates the area on that coordinate system that the cell occupies*, aka the visibility
 - It sums the cells, to calculate total visibility
 
-*This means there is currently some distortion to account for, but this should be minimal since it is at the poles and most cells will be near the centerline.  
+*This creates some distortion, but mostly at the poles of the sphere.  The visible cells will not be high enough in the sphere for this to make a real difference.  
 
 The tool outputs a csv of each FID with its total visibility.  
 
 -- Graphics --
-It also outputs csvs of the cells, relative to the viewer.  This can be used to visualize the location, see screenshots.  Currently this won't work on the remote lab computer since it requires a library called pygame.
+It also outputs csvs of the cells, for each VP, relative to the viewer.  This can be used to visualize the location, see screenshots.  Currently this won't work on the remote lab computer since it requires a library called pygame.
