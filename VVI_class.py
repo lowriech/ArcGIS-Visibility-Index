@@ -20,7 +20,6 @@ class Visibility_Measure:
         self.scratchspace = scratchspace
         self.ViewPoint_list = []
         #1st Quadrant, for visualization
-        self.Q1 = []
         VPs = arcpy.SearchCursor(self.ViewPoints)
         for VP in VPs:
             self.main(VP)
@@ -39,23 +38,42 @@ class Visibility_Measure:
         y_bottomR = Y + math.sqrt(cell_res*cell_res/2.0)*math.cos(math.radians(315-aspect))
         z_top = Z + cell_res/2.0*math.tan(math.radians(slope))
         z_bottom = Z - cell_res/2.0*math.tan(math.radians(slope))
-        return [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
+        pts = [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
+        #return self.getPlane(pts, X, Y, Z, cell_res)
+        #self.getPlane(pts, X, Y, Z, cell_res)
+        a, b, c, d = self.getPlace(pts, X, Y, Z, cell_res) 
+        #(d - a*x - b*y)/c
+        if abs(d) > 1000:
+            try:
+                x_R = x + cel_res/2.0
+                x_L = x - cel_res/2.0
+                y_T = y + cel_res/2.0
+                y_B = y - cel_res/2.0
+                pts = [(x_R, y_T, (d - a*x_R - b*y_T)/c), (x_L, y_T, (d - a*x_L - b*y_T)/c), (x_L, y_B, (d - a*x_L - b*y_B)/c), (x_R, y_B, (d - a*x_R - b*y_B)/c)]
+            except:
+                ZeroDivisionError
+        return pts
 
     def getSphericalCoordinates(self, pts, VP):
         spherical_coords = []
-        #Q1 stands for quadrant 1, it is for pending visualization
-        Q1_pending = []
         for pt in pts:
-            Horiz = math.atan((VP[1]-pt[1])/(VP[0]-pt[0]))
+            angle = math.atan(abs((VP[1]-pt[1])/(VP[0]-pt[0])))
+            if pt[0] > VP[0]:
+                if pt[1] > VP[1]: #1st Quadrant
+                    Horiz = angle
+                else: #4th Quadrant
+                    Horiz = 2*math.pi - angle
+            else:
+                if pt[1] > VP[1]: #2nd Quadrant
+                    Horiz = math.pi - angle
+                else: #3rd Quadrant
+                    Horiz = math.pi + angle
             #vertical angle
+
             Adj = math.hypot(VP[0]-pt[0], VP[1]-pt[1])
             Opp = (pt[2] - VP[2])
             Vert = math.atan(Opp/Adj)
             spherical_coords.append([math.degrees(Horiz), math.degrees(Vert)])
-            Q1_pending.append([int(round(10*math.degrees(Horiz))), int(round(10*math.degrees(Vert)))])
-        #if in first quadrant
-        if (VP[0] < pts[0][0]) and (VP[1] < pts[0][1]):
-            self.Q1.append(Q1_pending)
         return spherical_coords
 
     def getArea(self, pts):
@@ -66,11 +84,13 @@ class Visibility_Measure:
 
     #TODO: Add a function to print visible values to a csv
     #For future visualization
-    def printCellsForVisual(self, VP, output):
-        #take an output value for the csv
-        #print each visible cell to its own row
-        pass
-
+    def printCellsForVisual(self, output):
+        for VP in self.ViewPoint_list:
+            output2 = output[0:-4]+str(VP.FID) + '.csv'
+            outfile = open(output2, 'wb')
+            writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
+            for i in VP.visibleCells:
+                writer.writerow(i)
 
     def getVisiblePoints(self, VP):
         visible_pts = self.scratchspace + "\\vis_pts_" + str(VP.FID) + ".shp"
@@ -78,12 +98,32 @@ class Visibility_Measure:
         arcpy.AddMessage("Successfully clipped FID {}".format(str(VP.FID)))
         return arcpy.SearchCursor(visible_pts)
 
+    def getPlane(self, pts, x, y, z, cell_res):
+        #Create a plane given three points
+        p1 = numpy.array(pts[0])
+        p2 = numpy.array(pts[1])
+        p3 = numpy.array(pts[2])
+
+        # These two vectors are in the plane
+        v1 = p3 - p1
+        v2 = p2 - p1
+
+        # the cross product is a vector normal to the plane
+        cp = numpy.cross(v1, v2)
+        a, b, c = cp
+
+        # This evaluates a * x3 + b * y3 + c * z3 which equals d
+        #(d - a*x - b*y)/c
+        d = numpy.dot(cp, p3)
+        return a,b,c,d
+
+
     def printPoints(self, output):
         headings = ['ViewPoint_ID', 'RawTotal']
         outfile = open(output, 'wb')
         writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
         writer.writerow(headings)
-        for VP in ViewPoint_list:
+        for VP in self.ViewPoint_list:
             row = [str(VP.FID), VP.total]
             writer.writerow(row)
 
@@ -97,14 +137,13 @@ class Visibility_Measure:
         corners = map(self.getAdjustedCorners, visible_pts_cursor)
         #convert to spherical relative to VP
         spherical_coords = map(self.getSphericalCoordinates, corners, [ViewPoint_XYZ]*len(corners))
+        VP.setVisibleCells(spherical_coords)
         #calculate areas
         areas = map(self.getArea, spherical_coords)
         #sum for the VP
         total = numpy.sum(areas)
         VP.setTotal(total)
         self.ViewPoint_list.append(VP)
-        VP.setVisibleCells(self.Q1)
-        self.Q1 = []
         arcpy.AddMessage("Successfully measured FID {}".format(str(VP.FID)))
 
          # Numbers that are written    
