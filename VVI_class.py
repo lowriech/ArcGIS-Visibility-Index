@@ -86,7 +86,7 @@ class Visibility_Measure:
     #For future visualization
     def printCellsForVisual(self, output):
         for VP in self.ViewPoint_list:
-            output2 = output[0:-4]+str(VP.FID) + '.csv'
+            output2 = output[0:-4]+ '_' +str(VP.FID) + '.csv'
             outfile = open(output2, 'wb')
             writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
             for i in VP.visibleCells:
