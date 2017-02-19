@@ -32,4 +32,6 @@ For each point visible from a viewpoint:
 *This means there is currently some distortion to account for, but this should be minimal since it is at the poles and most cells will be near the centerline.  
 
 The tool outputs a csv of each FID with its total visibility.  
-It also outputs csvs of the cells, relative to the viewer.  This can be used to visualize the location, see screenshots.
+
+-- Graphics --
+It also outputs csvs of the cells, relative to the viewer.  This can be used to visualize the location, see screenshots.  Currently this won't work on the remote lab computer since it requires a library called pygame.
