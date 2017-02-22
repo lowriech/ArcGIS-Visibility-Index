@@ -129,7 +129,9 @@ class Visibility_Measure:
 
     def main(self, Viewpoint):
         #Create a viewpoint
-        VP = ViewPoint.ViewPoint(Viewpoint.FID, Viewpoint.POINT_X, Viewpoint.POINT_Y, Viewpoint.getValue(self.Viewpoint_Z), self.Viewshed_Folder)
+        VP = ViewPoint.ViewPoint(Viewpoint.getValue("ThisID"), Viewpoint.POINT_X, Viewpoint.POINT_Y, Viewpoint.getValue(self.Viewpoint_Z), self.Viewshed_Folder)
+        #TODO: Add a field tying the VPs to the viewsheds
+        #This should actually be done in the viewshed model, adding a path to the VP file
         ViewPoint_XYZ = [VP.x, VP.y, VP.z] 
         #Get visible pts       
         visible_pts_cursor = self.getVisiblePoints(VP)
