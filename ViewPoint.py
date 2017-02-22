@@ -3,7 +3,7 @@ import arcpy
 
 class ViewPoint:
 	def __init__(self, FID, X, Y, Z, viewshed):
-		self.FID = FID
+		self.FID = int(FID)
 		self.x = X
 		self.y = Y
 		self.z = Z + 2
