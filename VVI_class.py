@@ -94,6 +94,7 @@ class Visibility_Measure:
 
     def getVisiblePoints(self, VP):
         visible_pts = self.scratchspace + "\\vis_pts_" + str(VP.FID) + ".shp"
+        arcpy.AddMessage(str(VP.FID))
         arcpy.Clip_analysis (self.CellValues, VP.viewshed, visible_pts)
         arcpy.AddMessage("Successfully clipped FID {}".format(str(VP.FID)))
         return arcpy.SearchCursor(visible_pts)
