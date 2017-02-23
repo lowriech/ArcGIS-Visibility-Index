@@ -20,9 +20,16 @@ class Visibility_Measure:
         self.scratchspace = scratchspace
         self.ViewPoint_list = []
         #1st Quadrant, for visualization
+        headings = ['ViewPoint_ID', 'RawTotal']
+        outfile = open(output, 'wb')
+        writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
+        writer.writerow(headings)
+        
         VPs = arcpy.SearchCursor(self.ViewPoints)
         for VP in VPs:
-            self.main(VP)
+            ID, total = self.main(VP)
+            row = [ID, str(VP.total)]
+            writer.writerow(row)
 
     def getAdjustedCorners(self, pt):
         #Returns the four corners of the cell
@@ -149,6 +156,7 @@ class Visibility_Measure:
         VP.setTotal(total)
         self.ViewPoint_list.append(VP)
         arcpy.AddMessage("Successfully measured FID {}".format(str(VP.FID)))
+        return VP.FID, total
 
          # Numbers that are written    
         
