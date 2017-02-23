@@ -45,6 +45,6 @@ arcpy.AddXY_management(ViewPoints)
 if FileName[-4:] != '.csv':
     FileName = str(FileName) + ".csv"
 
-VVI = VVI_class.Visibility_Measure(CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace)
-VVI.printPoints(FileName)
-VVI.printCellsForVisual(FileName)
+VVI = VVI_class.Visibility_Measure(CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace, FileName)
+#VVI.printPoints(FileName)
+#VVI.printCellsForVisual(FileName)
