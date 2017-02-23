@@ -28,7 +28,7 @@ class Visibility_Measure:
         VPs = arcpy.SearchCursor(self.ViewPoints)
         for VP in VPs:
             ID, total = self.main(VP)
-            row = [ID, str(VP.total)]
+            row = [ID, total]
             writer.writerow(row)
 
     def getAdjustedCorners(self, pt):
