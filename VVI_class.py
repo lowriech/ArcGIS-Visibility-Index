@@ -7,7 +7,7 @@ import ViewPoint
 
 class Visibility_Measure:
 #Measures the total viewing angle
-    def __init__(self, CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace):
+    def __init__(self, CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace, output):
         self.CellValues = CellValues
         self.CV_Z = CV_Z
         self.CV_Slope = CV_Slope
