@@ -156,6 +156,7 @@ class Visibility_Measure:
         VP.setTotal(total)
         self.ViewPoint_list.append(VP)
         arcpy.AddMessage("Successfully measured FID {}".format(str(VP.FID)))
+        arcpy.AddMessage("FID {}: Visibility score: {}".format(str(VP.FID),str(total)))
         return VP.FID, total
 
          # Numbers that are written    
