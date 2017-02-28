@@ -7,7 +7,7 @@ import ViewPoint
 
 class Visibility_Measure:
 #Measures the total viewing angle
-    def __init__(self, CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace):
+    def __init__(self, CellValues, CV_Z, CV_Slope, CV_Aspect, CV_XY, FileName, ViewPoints, Viewpoint_Z, Viewshed_Folder, scratchspace, output):
         self.CellValues = CellValues
         self.CV_Z = CV_Z
         self.CV_Slope = CV_Slope
@@ -19,10 +19,16 @@ class Visibility_Measure:
         self.Viewshed_Folder = Viewshed_Folder
         self.scratchspace = scratchspace
         self.ViewPoint_list = []
-        #1st Quadrant, for visualization
+        headings = ['ViewPoint_ID', 'RawTotal']
+        outfile = open(output, 'wb')
+        writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
+        writer.writerow(headings)
+        
         VPs = arcpy.SearchCursor(self.ViewPoints)
         for VP in VPs:
-            self.main(VP)
+            ID, total = self.main(VP)
+            row = [ID, total]
+            writer.writerow(row)
 
     def getAdjustedCorners(self, pt):
         #Returns the four corners of the cell
@@ -41,17 +47,17 @@ class Visibility_Measure:
         pts = [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
         #return self.getPlane(pts, X, Y, Z, cell_res)
         #self.getPlane(pts, X, Y, Z, cell_res)
-        a, b, c, d = self.getPlace(pts, X, Y, Z, cell_res) 
+        #a, b, c, d = self.getPlane(pts, X, Y, Z, cell_res) 
         #(d - a*x - b*y)/c
-        if abs(d) > 1000:
-            try:
-                x_R = x + cel_res/2.0
-                x_L = x - cel_res/2.0
-                y_T = y + cel_res/2.0
-                y_B = y - cel_res/2.0
-                pts = [(x_R, y_T, (d - a*x_R - b*y_T)/c), (x_L, y_T, (d - a*x_L - b*y_T)/c), (x_L, y_B, (d - a*x_L - b*y_B)/c), (x_R, y_B, (d - a*x_R - b*y_B)/c)]
-            except:
-                ZeroDivisionError
+        #if abs(d) > 1000:
+        #    try:
+        #        x_R = x + cel_res/2.0
+        #        x_L = x - cel_res/2.0
+        #        y_T = y + cel_res/2.0
+        #        y_B = y - cel_res/2.0
+        #        pts = [(x_R, y_T, (d - a*x_R - b*y_T)/c), (x_L, y_T, (d - a*x_L - b*y_T)/c), (x_L, y_B, (d - a*x_L - b*y_B)/c), (x_R, y_B, (d - a*x_R - b*y_B)/c)]
+        #    except:
+        #        ZeroDivisionError
         return pts
 
     def getSphericalCoordinates(self, pts, VP):
@@ -94,9 +100,11 @@ class Visibility_Measure:
 
     def getVisiblePoints(self, VP):
         visible_pts = self.scratchspace + "\\vis_pts_" + str(VP.FID) + ".shp"
+        arcpy.AddMessage(VP.viewshed)
+        arcpy.AddMessage(visible_pts)
         arcpy.Clip_analysis (self.CellValues, VP.viewshed, visible_pts)
         arcpy.AddMessage("Successfully clipped FID {}".format(str(VP.FID)))
-        return arcpy.SearchCursor(visible_pts)
+        return visible_pts
 
     def getPlane(self, pts, x, y, z, cell_res):
         #Create a plane given three points
@@ -129,15 +137,18 @@ class Visibility_Measure:
 
     def main(self, Viewpoint):
         #Create a viewpoint
-        VP = ViewPoint.ViewPoint(Viewpoint.FID, Viewpoint.POINT_X, Viewpoint.POINT_Y, Viewpoint.getValue(self.Viewpoint_Z), self.Viewshed_Folder)
+        VP = ViewPoint.ViewPoint(Viewpoint.getValue("ThisID"), Viewpoint.POINT_X, Viewpoint.POINT_Y, Viewpoint.getValue(self.Viewpoint_Z), self.Viewshed_Folder)
+        #TODO: Add a field tying the VPs to the viewsheds
+        #This should actually be done in the viewshed model, adding a path to the VP file
         ViewPoint_XYZ = [VP.x, VP.y, VP.z] 
-        #Get visible pts       
-        visible_pts_cursor = self.getVisiblePoints(VP)
+        #Get visible pts
+        vis_pts = self.getVisiblePoints(VP)
+        visible_pts_cursor = arcpy.SearchCursor(vis_pts)
         #calculate corner locations
         corners = map(self.getAdjustedCorners, visible_pts_cursor)
         #convert to spherical relative to VP
         spherical_coords = map(self.getSphericalCoordinates, corners, [ViewPoint_XYZ]*len(corners))
-        VP.setVisibleCells(spherical_coords)
+        #VP.setVisibleCells(spherical_coords)
         #calculate areas
         areas = map(self.getArea, spherical_coords)
         #sum for the VP
@@ -145,6 +156,11 @@ class Visibility_Measure:
         VP.setTotal(total)
         self.ViewPoint_list.append(VP)
         arcpy.AddMessage("Successfully measured FID {}".format(str(VP.FID)))
+        arcpy.AddMessage("FID {}: Visibility score: {}".format(str(VP.FID),str(total)))
+        arcpy.Delete_management(vis_pts)
+        arcpy.Delete_management(visible_pts_cursor)
+        arcpy.Delete_management(spherical_coords)
+        return VP.FID, total
 
          # Numbers that are written    
         
