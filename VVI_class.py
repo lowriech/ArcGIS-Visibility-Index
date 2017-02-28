@@ -48,17 +48,17 @@ class Visibility_Measure:
         pts = [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
         #return self.getPlane(pts, X, Y, Z, cell_res)
         #self.getPlane(pts, X, Y, Z, cell_res)
-        a, b, c, d = self.getPlane(pts, X, Y, Z, cell_res) 
+        #a, b, c, d = self.getPlane(pts, X, Y, Z, cell_res) 
         #(d - a*x - b*y)/c
-        if abs(d) > 1000:
-            try:
-                x_R = x + cel_res/2.0
-                x_L = x - cel_res/2.0
-                y_T = y + cel_res/2.0
-                y_B = y - cel_res/2.0
-                pts = [(x_R, y_T, (d - a*x_R - b*y_T)/c), (x_L, y_T, (d - a*x_L - b*y_T)/c), (x_L, y_B, (d - a*x_L - b*y_B)/c), (x_R, y_B, (d - a*x_R - b*y_B)/c)]
-            except:
-                ZeroDivisionError
+        #if abs(d) > 1000:
+        #    try:
+        #        x_R = x + cel_res/2.0
+        #        x_L = x - cel_res/2.0
+        #        y_T = y + cel_res/2.0
+        #        y_B = y - cel_res/2.0
+        #        pts = [(x_R, y_T, (d - a*x_R - b*y_T)/c), (x_L, y_T, (d - a*x_L - b*y_T)/c), (x_L, y_B, (d - a*x_L - b*y_B)/c), (x_R, y_B, (d - a*x_R - b*y_B)/c)]
+        #    except:
+        #        ZeroDivisionError
         return pts
 
     def getSphericalCoordinates(self, pts, VP):
