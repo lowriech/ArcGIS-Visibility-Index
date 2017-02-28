@@ -19,7 +19,6 @@ class Visibility_Measure:
         self.Viewshed_Folder = Viewshed_Folder
         self.scratchspace = scratchspace
         self.ViewPoint_list = []
-        #1st Quadrant, for visualization
         headings = ['ViewPoint_ID', 'RawTotal']
         outfile = open(output, 'wb')
         writer = csv.writer(outfile, delimiter = ',', quotechar = '"')
@@ -105,7 +104,7 @@ class Visibility_Measure:
         arcpy.AddMessage(visible_pts)
         arcpy.Clip_analysis (self.CellValues, VP.viewshed, visible_pts)
         arcpy.AddMessage("Successfully clipped FID {}".format(str(VP.FID)))
-        return arcpy.SearchCursor(visible_pts)
+        return visible_pts
 
     def getPlane(self, pts, x, y, z, cell_res):
         #Create a plane given three points
@@ -142,13 +141,14 @@ class Visibility_Measure:
         #TODO: Add a field tying the VPs to the viewsheds
         #This should actually be done in the viewshed model, adding a path to the VP file
         ViewPoint_XYZ = [VP.x, VP.y, VP.z] 
-        #Get visible pts       
-        visible_pts_cursor = self.getVisiblePoints(VP)
+        #Get visible pts
+        vis_pts = self.getVisiblePoints(VP)
+        visible_pts_cursor = arcpy.SearchCursor(vis_pts)
         #calculate corner locations
         corners = map(self.getAdjustedCorners, visible_pts_cursor)
         #convert to spherical relative to VP
         spherical_coords = map(self.getSphericalCoordinates, corners, [ViewPoint_XYZ]*len(corners))
-        VP.setVisibleCells(spherical_coords)
+        #VP.setVisibleCells(spherical_coords)
         #calculate areas
         areas = map(self.getArea, spherical_coords)
         #sum for the VP
@@ -157,6 +157,9 @@ class Visibility_Measure:
         self.ViewPoint_list.append(VP)
         arcpy.AddMessage("Successfully measured FID {}".format(str(VP.FID)))
         arcpy.AddMessage("FID {}: Visibility score: {}".format(str(VP.FID),str(total)))
+        arcpy.Delete_management(vis_pts)
+        arcpy.Delete_management(visible_pts_cursor)
+        arcpy.Delete_management(spherical_coords)
         return VP.FID, total
 
          # Numbers that are written    
