@@ -48,7 +48,7 @@ class Visibility_Measure:
         pts = [(x_topR, y_topR, z_top), (x_topL, y_topL, z_top), (x_bottomL, y_bottomL, z_bottom), (x_bottomR, y_bottomR, z_bottom)] 
         #return self.getPlane(pts, X, Y, Z, cell_res)
         #self.getPlane(pts, X, Y, Z, cell_res)
-        a, b, c, d = self.getPlace(pts, X, Y, Z, cell_res) 
+        a, b, c, d = self.getPlane(pts, X, Y, Z, cell_res) 
         #(d - a*x - b*y)/c
         if abs(d) > 1000:
             try:
