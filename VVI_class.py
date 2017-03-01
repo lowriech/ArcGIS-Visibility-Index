@@ -157,9 +157,9 @@ class Visibility_Measure:
         self.ViewPoint_list.append(VP)
         arcpy.AddMessage("Successfully measured FID {}".format(str(VP.FID)))
         arcpy.AddMessage("FID {}: Visibility score: {}".format(str(VP.FID),str(total)))
-        arcpy.Delete_management(vis_pts)
-        arcpy.Delete_management(visible_pts_cursor)
-        arcpy.Delete_management(spherical_coords)
+        #arcpy.Delete_management(vis_pts)
+        #arcpy.Delete_management(visible_pts_cursor)
+        #arcpy.Delete_management(spherical_coords)
         return VP.FID, total
 
          # Numbers that are written    
